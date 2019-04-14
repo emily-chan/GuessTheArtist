@@ -58,14 +58,14 @@ public class ClientHandler implements Runnable {
           for (Socket s : socketList) {
             if (s != connectionSock) {
               DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-              clientOutput.writeBytes(text + "\n");
+              clientOutput.writeBytes(username + ": " + text + "\n");
             }
           }
         }
       }
       while (true) {
           if (username.equalsIgnoreCase("host")) {
-            String command = clientInput.readLine(); // 4 //
+            String command = clientInput.readLine();
             if (command.equalsIgnoreCase("points")) {
               String userToaward = clientInput.readLine();
               int pts = clientInput.read();
@@ -77,12 +77,10 @@ public class ClientHandler implements Runnable {
               for (Socket s : socketList) {
                 if (s != connectionSock) {
                   DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-                  clientOutput.writeBytes("points awarded: " + pts + "\n");
+                  clientOutput.writeBytes(userToaward + " was awarded " + pts + " points\n");
 
                 }
               }
-
-
             } else if (command.equalsIgnoreCase("leaderboard")) {
               Collections.sort(playerList, Collections.reverseOrder());
 
@@ -99,11 +97,10 @@ public class ClientHandler implements Runnable {
               }
             }
             else {  //if none of key words entered, then broadcast
-              String input = clientInput.readLine();
               for (Socket s : socketList) {
                 if (s != connectionSock) {
                   DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-                  clientOutput.writeBytes(input+"\n");
+                  clientOutput.writeBytes(username + ": " +command+"\n");
                 }
               }
             }
@@ -125,7 +122,7 @@ public class ClientHandler implements Runnable {
               for (Socket s : socketList) {
                 if (s != connectionSock) {
                   DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-                  clientOutput.writeBytes(input+"\n");
+                  clientOutput.writeBytes(username + ": " +input+"\n");
                 }
               }
             }

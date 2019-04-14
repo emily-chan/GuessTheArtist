@@ -95,9 +95,11 @@ public class MtClient {
             serverOutput.writeBytes(u+"\n");
             serverOutput.writeByte(pts);
           }
+          /*
           else {
             serverOutput.writeBytes(command + "\n");
           }
+          */
         }
         else
         {
