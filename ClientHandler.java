@@ -16,11 +16,15 @@ import java.net.Socket;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Collections;
+
 
 
 public class ClientHandler implements Runnable {
   private Socket connectionSock = null;
   private ArrayList<Socket> socketList;
+  public static ArrayList<Player> playerList = new ArrayList<Player>();
+  public String artist = "";
 
   ClientHandler(Socket sock, ArrayList<Socket> socketList) {
     this.connectionSock = sock;
@@ -37,53 +41,104 @@ public class ClientHandler implements Runnable {
       BufferedReader clientInput = new BufferedReader(
           new InputStreamReader(connectionSock.getInputStream()));
 
-      String username = clientInput.readLine();
-      System.out.println(username + " has joined the chat");
-      // whenever another user joins the chat, display to all clients and server
-
-      if (username.equalsIgnoreCase("host")) {
-        String question = clientInput.readLine();
-        //System.out.println("Question from Host: " + question);
-        for (Socket s : socketList) {
-          if (s != connectionSock) {
-            DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-            clientOutput.writeBytes(username + ": " + question + "\n");
-          }
-        }
-        String command = clientInput.readLine();
-        if (command.equalsIgnoreCase("add")) {
-          String add = clientInput.readLine();
-          System.out.println("added client");
-        } else if (command.equalsIgnoreCase("points")) {
-          String points = clientInput.readLine();
-          System.out.println("assigned points");
-        } else if (command.equalsIgnoreCase("leaderboard")) {            
-          String leaderboard = clientInput.readLine();
+      String username = clientInput.readLine();   // 1 //
+      if(username.equalsIgnoreCase("host")) {
+        // whenever another user joins the chat, display to all clients and server
+        artist = clientInput.readLine(); // 2 //
+      }
+      else {  //if not host
+        String text = clientInput.readLine();
+        if (text.equalsIgnoreCase("join game")) { // 3 //
+          Player temp = new Player(username);
+          temp.setOptedIn(true);
+          playerList.add(temp);
           for (Socket s : socketList) {
             if (s != connectionSock) {
               DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-              clientOutput.writeBytes("LEADERBOARD: \n");
-              clientOutput.writeBytes(leaderboard);
+              clientOutput.writeBytes(username + " has joined the game!\n");
+            }
+          }
+        }
+        else {
+          for (Socket s : socketList) {
+            if (s != connectionSock) {
+              DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+              clientOutput.writeBytes(text + "\n");
             }
           }
         }
       }
-
       while (true) {
-        // Get data sent from a client
-        String clientText = clientInput.readLine();
-        if (clientText != null) {
-          System.out.println(username + ": " + clientText);
-          // Turn around and output this data
-          // to all other clients except the one
-          // that sent us this information
-          for (Socket s : socketList) {
-            if (s != connectionSock) {
-              DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-              clientOutput.writeBytes(username + ": " + clientText + "\n");
+          if (username.equalsIgnoreCase("host")) {
+            String command = clientInput.readLine(); // 4 //
+            if (command.equalsIgnoreCase("points")) {
+              String userToaward = clientInput.readLine();
+              int pts = clientInput.read();
+              for (Player p : playerList) {
+                if (p.getUsername().equalsIgnoreCase(userToaward)) {
+                  p.setScore(p.getScore() + pts);
+                }
+              }
+              for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes("points awarded: " + pts + "\n");
+
+                }
+              }
+
+
+            } else if (command.equalsIgnoreCase("leaderboard")) {
+            //  String leaderboard = clientInput.readLine(); // 7 //
+              Collections.sort(playerList, Collections.reverseOrder());
+
+              for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes("LEADERBOARD: \n");
+                  for (Player p : playerList) {
+                    if (p.getOptedIn()) {
+                      clientOutput.writeBytes(p.toString() + "\n"); // 7 //
+                    }
+                  }
+                }
+              }
+            }
+            else {  //if none of key words entered, then broadcast
+              String input = clientInput.readLine();
+              for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes(input+"\n");
+                }
+              }
             }
           }
-        } else {
+          else {  //if not host client
+            String input = clientInput.readLine();
+            if (input.equalsIgnoreCase("join game")) { // 3 //
+              Player temp = new Player(username);
+              temp.setOptedIn(true);
+              playerList.add(temp);
+              for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes(username + " has joined the game!\n");
+                }
+              }
+            }
+            else {
+              for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes(input+"\n");
+                }
+              }
+            }
+          }
+
+
+        /* else {
           // Connection was lost
           System.out.println("Closing connection for socket " + connectionSock);
           // Remove from arraylist
@@ -91,6 +146,7 @@ public class ClientHandler implements Runnable {
           connectionSock.close();
           break;
         }
+        */
       }
     } catch (Exception e) {
       System.out.println("Error: " + e.toString());
