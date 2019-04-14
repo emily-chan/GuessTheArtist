@@ -26,7 +26,6 @@ import java.net.Socket;
 
 import java.util.Scanner;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.*;
 
 public class MtClient {
@@ -34,8 +33,7 @@ public class MtClient {
    * main method.
    * @params not used.
    */
-  
-  private static ArrayList<Player> playerList = new ArrayList<Player>();
+
 
   public static void main(String[] args) {
     try {
@@ -64,49 +62,57 @@ public class MtClient {
       serverOutput.writeBytes(username + "\n");
       // check if username is host
       if (username.equalsIgnoreCase("host")) {
-        System.out.print("Enter a question for clients: ");
-        String question = keyboard.nextLine();
-        serverOutput.writeBytes(question + "\n");
-        System.out.print("Enter the correct answer: ");
-        String hostAnswer = keyboard.nextLine();
+        System.out.print("You are the host! Enter the Artist's name to begin the round: ");
+        String artistName = keyboard.nextLine();  //add function that takes in String artistName to retrieve and play spotify song
+        serverOutput.writeBytes(artistName + "\n");
+      }
+      else {  //if not host
+        System.out.println("Welcome to the Guess the Artist Game! type 'join game' to opt-in to the game! if, not you may just lurk as a spectator.");
+        String input = keyboard.nextLine();
+        if (input.equals("join game")) {
+          serverOutput.writeBytes("join game\n");
+          System.out.println("You have opted-in to participate! Be the first person to answer the host's question correctly to earn points.");
+        }
+        else {
+          serverOutput.writeBytes(input + "\n");
+        }
       }
 
       while (true) {
         //commands for the host
-        
         if (username.equalsIgnoreCase("host")) {
-          System.out.println("Type 'add' to add a client's username to the list");
           System.out.println("Type 'points' to award points to a specific client");
           System.out.println("Type 'leaderboard' to display all clients and their scores");
+          System.out.println("Or type 'artist' to start a new round");
           String command = keyboard.nextLine();
-          if (command.equals("add")) { //add player
+          serverOutput.writeBytes(command+"\n");
+          if (command.equalsIgnoreCase("points")) { //award points to certain client by username
             System.out.print("Enter client's username: ");
             String u = keyboard.nextLine();
-            Player p = new Player(u);
-            playerList.add(p);
-            System.out.println("Press 'Enter' key to continue"); 
-          } else if (command.equalsIgnoreCase("points")) { //award points to certain client by username
-            System.out.print("Enter client's username: ");
-            String u = keyboard.nextLine();
-            System.out.print("Enter number of points to award to client: ");
+            System.out.print("Enter number of points to award to client: ");  //we should add a function to calculate points awarded based on obscurity of artist
+            //pointsToAward(String hostAnswer); //either pull popularity stats from spotify or sentiment analysis from twitter and calculate
             int pts = keyboard.nextInt();
-            for (Player p : playerList) {
-              if (p.username.equals(u)) {
-                p.addPoints(pts);
-              }
-            }
-          } else if (command.equalsIgnoreCase("leaderboard")) { //print leaderboard
-            serverOutput.writeBytes("LEADERBOARD" + "\n");
-            // display leaderboard in decreasing order
-            Collections.sort(playerList, Collections.reverseOrder()); 
-            for (Player p : playerList) {
-              serverOutput.writeBytes(p.toString() + "\n");
-            }
+            serverOutput.writeBytes(u+"\n");
+            serverOutput.writeByte(pts);
+          }
+          /*
+          else {
+            serverOutput.writeBytes(command + "\n");
+          }
+          */
+        }
+        else
+        {
+          //commands for clients
+          String input = keyboard.nextLine();
+          if (input.equals("join game")) {
+            serverOutput.writeBytes("join game\n");
+            System.out.println("You have opted-in to participate! Be the first person to answer the host's question correctly to earn points.");
+          }
+          else {
+            serverOutput.writeBytes(input + "\n");
           }
         }
-        
-        String data = keyboard.nextLine();
-        serverOutput.writeBytes(data + "\n");
       }
     } catch (IOException e) {
       System.out.println(e.getMessage());

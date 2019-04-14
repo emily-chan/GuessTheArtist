@@ -1,15 +1,16 @@
 import java.io.*;
-
 import java.util.*;
 
 public class Player implements Comparable<Player> {
   public String username;
   public int score;
   public ArrayList<Player> players = new ArrayList<Player>();
-  
+  public boolean optedIn;
+
   public Player(String s) {
     this.username = s;
     this.score = 0;
+    this.optedIn = false;
   }
 
   public String toString() {
@@ -19,7 +20,7 @@ public class Player implements Comparable<Player> {
   public void addPoints(int p) {
     this.score = this.score + p;
   }
-  
+
   public void setScore(int p){
     this.score = p;
   }
@@ -39,5 +40,13 @@ public class Player implements Comparable<Player> {
   public int compareTo(Player p) {
     int compareScore = ((Player) p).getScore();
     return this.score - compareScore;
+  }
+
+  public boolean getOptedIn() {
+    return this.optedIn;
+  }
+
+  public void setOptedIn(boolean set) {
+    this.optedIn = set;
   }
 }
