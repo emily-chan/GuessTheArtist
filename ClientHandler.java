@@ -64,28 +64,40 @@ public class ClientHandler implements Runnable {
         }
       }
       while (true) {
+        String command = clientInput.readLine();
+        if(command != null) {
           if (username.equalsIgnoreCase("host")) {
-            String command = clientInput.readLine();
             if (command.equalsIgnoreCase("points")) {
               String userToaward = clientInput.readLine();
               int pts = clientInput.read();
+              boolean playerOptedIn = false;
               for (Player p : playerList) {
                 if (p.getUsername().equalsIgnoreCase(userToaward)) {
                   p.setScore(p.getScore() + pts);
+                  playerOptedIn = true;
                 }
               }
-              for (Socket s : socketList) {
-                if (s != connectionSock) {
-                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-                  clientOutput.writeBytes(userToaward + " was awarded " + pts + " points\n");
+              if (playerOptedIn) {
+                for (Socket s : socketList) {
+                  if (s == connectionSock) {
+                    DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                    clientOutput.writeBytes("\n"+userToaward + " was awarded " + pts + " points\n");
+                  }
+                }
+              }
+              else {
+                for (Socket s : socketList) {
+                  if (s == connectionSock) {
+                    DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                    clientOutput.writeBytes("\n" +userToaward + " has not opted into the game! No points awarded\n");
+                  }
+                }
+              }
 
-                }
-              }
             } else if (command.equalsIgnoreCase("leaderboard")) {
               Collections.sort(playerList, Collections.reverseOrder());
 
               for (Socket s : socketList) {
-                if (s != connectionSock) {
                   DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
                   clientOutput.writeBytes("LEADERBOARD: \n");
                   for (Player p : playerList) {
@@ -93,9 +105,31 @@ public class ClientHandler implements Runnable {
                       clientOutput.writeBytes(p.toString() + "\n");
                     }
                   }
+              }
+            }
+            else if (command.equalsIgnoreCase("new artist")) {
+              String newArtist = clientInput.readLine();
+              artist = newArtist;
+              for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes("Host has changed the artist!\n");
                 }
               }
             }
+            else if (command.equalsIgnoreCase("start game")) {
+              for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes("Host has started the game!\n");
+                }
+              }
+              //retrieve song from spotify
+              //playback song
+              //start timer, maybe give hints after certain time periods
+            }
+
+
             else {  //if none of key words entered, then broadcast
               for (Socket s : socketList) {
                 if (s != connectionSock) {
@@ -106,8 +140,7 @@ public class ClientHandler implements Runnable {
             }
           }
           else {  //if not host client
-            String input = clientInput.readLine();
-            if (input.equalsIgnoreCase("join game")) {
+            if (command.equalsIgnoreCase("join game")) {
               Player temp = new Player(username);
               temp.setOptedIn(true);
               playerList.add(temp);
@@ -122,12 +155,22 @@ public class ClientHandler implements Runnable {
               for (Socket s : socketList) {
                 if (s != connectionSock) {
                   DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-                  clientOutput.writeBytes(username + ": " +input+"\n");
+                  clientOutput.writeBytes(username + ": " +command+"\n");
                 }
               }
             }
           }
+        }
+        else {
+          //Connection was lost
+          System.out.println("Closing connection for socket " + connectionSock);
+          //Remove from arraylist
+          socketList.remove(connectionSock);
+          connectionSock.close();
+          break;
+        }
       }
+
     } catch (Exception e) {
       System.out.println("Error: " + e.toString());
       // Remove from arraylist

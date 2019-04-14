@@ -62,7 +62,7 @@ public class MtClient {
       serverOutput.writeBytes(username + "\n");
       // check if username is host
       if (username.equalsIgnoreCase("host")) {
-        System.out.print("You are the host! Enter the Artist's name to begin the round: ");
+        System.out.print("You are the host! Enter an Artist's name: ");
         String artistName = keyboard.nextLine();  //add function that takes in String artistName to retrieve and play spotify song
         serverOutput.writeBytes(artistName + "\n");
       }
@@ -71,7 +71,7 @@ public class MtClient {
         String input = keyboard.nextLine();
         if (input.equals("join game")) {
           serverOutput.writeBytes("join game\n");
-          System.out.println("You have opted-in to participate! Be the first person to answer the host's question correctly to earn points.");
+          System.out.println("You have opted-in to participate! Be the first person to name the song correctly to earn points.");
         }
         else {
           serverOutput.writeBytes(input + "\n");
@@ -83,7 +83,8 @@ public class MtClient {
         if (username.equalsIgnoreCase("host")) {
           System.out.println("Type 'points' to award points to a specific client");
           System.out.println("Type 'leaderboard' to display all clients and their scores");
-          System.out.println("Or type 'artist' to start a new round");
+          System.out.println("Type 'new artist' to change the artist");
+          System.out.println("Type 'start game' to begin the game");
           String command = keyboard.nextLine();
           serverOutput.writeBytes(command+"\n");
           if (command.equalsIgnoreCase("points")) { //award points to certain client by username
@@ -93,13 +94,14 @@ public class MtClient {
             //pointsToAward(String hostAnswer); //either pull popularity stats from spotify or sentiment analysis from twitter and calculate
             int pts = keyboard.nextInt();
             serverOutput.writeBytes(u+"\n");
-            serverOutput.writeByte(pts);
+            serverOutput.writeByte(pts);  //can pass a maximum of 255 points in one writeByte
           }
-          /*
-          else {
-            serverOutput.writeBytes(command + "\n");
+          else if (command.equalsIgnoreCase("new artist")) {
+            System.out.println("Enter name of new artist: ");
+            String newArtist = keyboard.nextLine();
+            serverOutput.writeBytes(newArtist+"\n");
+            System.out.println("Artist changed to: " +newArtist);
           }
-          */
         }
         else
         {
@@ -107,7 +109,7 @@ public class MtClient {
           String input = keyboard.nextLine();
           if (input.equals("join game")) {
             serverOutput.writeBytes("join game\n");
-            System.out.println("You have opted-in to participate! Be the first person to answer the host's question correctly to earn points.");
+            System.out.println("You have opted-in to participate! Be the first person to name the song correctly to earn points.");
           }
           else {
             serverOutput.writeBytes(input + "\n");
