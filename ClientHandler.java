@@ -31,24 +31,19 @@ public class ClientHandler implements Runnable {
     this.socketList = socketList;  // Keep reference to master list
   }
 
-  /**
-   * received input from a client.
-   * sends it to other clients.
-   */
   public void run() {
     try {
       System.out.println("Connection made with socket " + connectionSock);
       BufferedReader clientInput = new BufferedReader(
           new InputStreamReader(connectionSock.getInputStream()));
 
-      String username = clientInput.readLine();   // 1 //
+      String username = clientInput.readLine();
       if(username.equalsIgnoreCase("host")) {
-        // whenever another user joins the chat, display to all clients and server
-        artist = clientInput.readLine(); // 2 //
+        artist = clientInput.readLine();
       }
       else {  //if not host
         String text = clientInput.readLine();
-        if (text.equalsIgnoreCase("join game")) { // 3 //
+        if (text.equalsIgnoreCase("join game")) {
           Player temp = new Player(username);
           temp.setOptedIn(true);
           playerList.add(temp);
@@ -89,7 +84,6 @@ public class ClientHandler implements Runnable {
 
 
             } else if (command.equalsIgnoreCase("leaderboard")) {
-            //  String leaderboard = clientInput.readLine(); // 7 //
               Collections.sort(playerList, Collections.reverseOrder());
 
               for (Socket s : socketList) {
@@ -98,7 +92,7 @@ public class ClientHandler implements Runnable {
                   clientOutput.writeBytes("LEADERBOARD: \n");
                   for (Player p : playerList) {
                     if (p.getOptedIn()) {
-                      clientOutput.writeBytes(p.toString() + "\n"); // 7 //
+                      clientOutput.writeBytes(p.toString() + "\n");
                     }
                   }
                 }
@@ -116,7 +110,7 @@ public class ClientHandler implements Runnable {
           }
           else {  //if not host client
             String input = clientInput.readLine();
-            if (input.equalsIgnoreCase("join game")) { // 3 //
+            if (input.equalsIgnoreCase("join game")) {
               Player temp = new Player(username);
               temp.setOptedIn(true);
               playerList.add(temp);
@@ -136,17 +130,6 @@ public class ClientHandler implements Runnable {
               }
             }
           }
-
-
-        /* else {
-          // Connection was lost
-          System.out.println("Closing connection for socket " + connectionSock);
-          // Remove from arraylist
-          socketList.remove(connectionSock);
-          connectionSock.close();
-          break;
-        }
-        */
       }
     } catch (Exception e) {
       System.out.println("Error: " + e.toString());
