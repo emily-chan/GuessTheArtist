@@ -16,21 +16,21 @@ import java.net.Socket;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Collections;
+
 
 
 public class ClientHandler implements Runnable {
   private Socket connectionSock = null;
   private ArrayList<Socket> socketList;
+  public static ArrayList<Player> playerList = new ArrayList<Player>();
+  public String artist = "";
 
   ClientHandler(Socket sock, ArrayList<Socket> socketList) {
     this.connectionSock = sock;
     this.socketList = socketList;  // Keep reference to master list
   }
 
-  /**
-   * received input from a client.
-   * sends it to other clients.
-   */
   public void run() {
     try {
       System.out.println("Connection made with socket " + connectionSock);
@@ -38,60 +38,139 @@ public class ClientHandler implements Runnable {
           new InputStreamReader(connectionSock.getInputStream()));
 
       String username = clientInput.readLine();
-      System.out.println(username + " has joined the chat");
-      // whenever another user joins the chat, display to all clients and server
-
-      if (username.equalsIgnoreCase("host")) {
-        String question = clientInput.readLine();
-        //System.out.println("Question from Host: " + question);
-        for (Socket s : socketList) {
-          if (s != connectionSock) {
-            DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-            clientOutput.writeBytes(username + ": " + question + "\n");
-          }
-        }
-        String command = clientInput.readLine();
-        if (command.equalsIgnoreCase("add")) {
-          String add = clientInput.readLine();
-          System.out.println("added client");
-        } else if (command.equalsIgnoreCase("points")) {
-          String points = clientInput.readLine();
-          System.out.println("assigned points");
-        } else if (command.equalsIgnoreCase("leaderboard")) {            
-          String leaderboard = clientInput.readLine();
+      if(username.equalsIgnoreCase("host")) {
+        artist = clientInput.readLine();
+      }
+      else {  //if not host
+        String text = clientInput.readLine();
+        if (text.equalsIgnoreCase("join game")) {
+          Player temp = new Player(username);
+          temp.setOptedIn(true);
+          playerList.add(temp);
           for (Socket s : socketList) {
             if (s != connectionSock) {
               DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-              clientOutput.writeBytes("LEADERBOARD: \n");
-              clientOutput.writeBytes(leaderboard);
+              clientOutput.writeBytes(username + " has joined the game!\n");
+            }
+          }
+        }
+        else {
+          for (Socket s : socketList) {
+            if (s != connectionSock) {
+              DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+              clientOutput.writeBytes(username + ": " + text + "\n");
             }
           }
         }
       }
-
       while (true) {
-        // Get data sent from a client
-        String clientText = clientInput.readLine();
-        if (clientText != null) {
-          System.out.println(username + ": " + clientText);
-          // Turn around and output this data
-          // to all other clients except the one
-          // that sent us this information
-          for (Socket s : socketList) {
-            if (s != connectionSock) {
-              DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-              clientOutput.writeBytes(username + ": " + clientText + "\n");
+        String command = clientInput.readLine();
+        if(command != null) {
+          if (username.equalsIgnoreCase("host")) {
+            if (command.equalsIgnoreCase("points")) {
+              String userToaward = clientInput.readLine();
+              int pts = clientInput.read();
+              boolean playerOptedIn = false;
+              for (Player p : playerList) {
+                if (p.getUsername().equalsIgnoreCase(userToaward)) {
+                  p.setScore(p.getScore() + pts);
+                  playerOptedIn = true;
+                }
+              }
+              if (playerOptedIn) {
+                for (Socket s : socketList) {
+                  if (s == connectionSock) {
+                    DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                    clientOutput.writeBytes("\n"+userToaward + " was awarded " + pts + " points\n");
+                  }
+                }
+              }
+              else {
+                for (Socket s : socketList) {
+                  if (s == connectionSock) {
+                    DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                    clientOutput.writeBytes("\n" +userToaward + " has not opted into the game! No points awarded\n");
+                  }
+                }
+              }
+
+            } else if (command.equalsIgnoreCase("leaderboard")) {
+              Collections.sort(playerList, Collections.reverseOrder());
+
+              for (Socket s : socketList) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes("LEADERBOARD: \n");
+                  for (Player p : playerList) {
+                    if (p.getOptedIn()) {
+                      clientOutput.writeBytes(p.toString() + "\n");
+                    }
+                  }
+              }
+            }
+            else if (command.equalsIgnoreCase("new artist")) {
+              String newArtist = clientInput.readLine();
+              artist = newArtist;
+              for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes("Host has changed the artist!\n");
+                }
+              }
+            }
+            else if (command.equalsIgnoreCase("start game")) {
+              for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes("Host has started the game!\n");
+                }
+              }
+              //retrieve song from spotify
+              //playback song
+              //start timer, maybe give hints after certain time periods
+            }
+
+
+            else {  //if none of key words entered, then broadcast
+              for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes(username + ": " +command+"\n");
+                }
+              }
             }
           }
-        } else {
-          // Connection was lost
+          else {  //if not host client
+            if (command.equalsIgnoreCase("join game")) {
+              Player temp = new Player(username);
+              temp.setOptedIn(true);
+              playerList.add(temp);
+              for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes(username + " has joined the game!\n");
+                }
+              }
+            }
+            else {
+              for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes(username + ": " +command+"\n");
+                }
+              }
+            }
+          }
+        }
+        else {
+          //Connection was lost
           System.out.println("Closing connection for socket " + connectionSock);
-          // Remove from arraylist
+          //Remove from arraylist
           socketList.remove(connectionSock);
           connectionSock.close();
           break;
         }
       }
+
     } catch (Exception e) {
       System.out.println("Error: " + e.toString());
       // Remove from arraylist
