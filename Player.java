@@ -6,11 +6,14 @@ public class Player implements Comparable<Player> {
   public int score;
   public ArrayList<Player> players = new ArrayList<Player>();
   public boolean optedIn;
+  public boolean isHost;
 
   public Player(String s) {
     this.username = s;
     this.score = 0;
     this.optedIn = false;
+    this.isHost = false;
+
   }
 
   public String toString() {
@@ -48,5 +51,12 @@ public class Player implements Comparable<Player> {
 
   public void setOptedIn(boolean set) {
     this.optedIn = set;
+  }
+
+  public boolean getIsHost() {
+    return this.isHost;
+  }
+  public void setIsHost(boolean set) {
+    this.isHost = set;
   }
 }
