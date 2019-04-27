@@ -14,11 +14,10 @@ import java.io.InputStreamReader;
 
 import java.net.Socket;
 
+import java.util.*;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.Collections;
-
-
+import java.util.Scanner;
 
 public class ClientHandler implements Runnable {
   private Socket connectionSock = null;
@@ -39,9 +38,8 @@ public class ClientHandler implements Runnable {
 
       String username = clientInput.readLine();
       if(username.equalsIgnoreCase("host")) {
-        artist = clientInput.readLine();
-      }
-      else {  //if not host
+      	artist = clientInput.readLine();
+      } else {  //if not host
         String text = clientInput.readLine();
         if (text.equalsIgnoreCase("join game")) {
           Player temp = new Player(username);
@@ -53,8 +51,7 @@ public class ClientHandler implements Runnable {
               clientOutput.writeBytes(username + " has joined the game!\n");
             }
           }
-        }
-        else {
+        } else {
           for (Socket s : socketList) {
             if (s != connectionSock) {
               DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
@@ -68,11 +65,12 @@ public class ClientHandler implements Runnable {
         if(command != null) {
           if (username.equalsIgnoreCase("host")) {
             if (command.equalsIgnoreCase("points")) {
-              String userToaward = clientInput.readLine();
-              int pts = clientInput.read();
+              String user = clientInput.readLine();
+              int pts = Pythonreader.runAnalysis(artist);
+              System.out.println("sent analysis result: " +pts);
               boolean playerOptedIn = false;
               for (Player p : playerList) {
-                if (p.getUsername().equalsIgnoreCase(userToaward)) {
+                if (p.getUsername().equalsIgnoreCase(user)) {
                   p.setScore(p.getScore() + pts);
                   playerOptedIn = true;
                 }
@@ -81,23 +79,20 @@ public class ClientHandler implements Runnable {
                 for (Socket s : socketList) {
                   if (s == connectionSock) {
                     DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-                    clientOutput.writeBytes("\n"+userToaward + " was awarded " + pts + " points\n");
+                    clientOutput.writeBytes("\n" + user + " was awarded " + pts + " points\n");
                   }
                 }
-              }
-              else {
+              } else {
                 for (Socket s : socketList) {
                   if (s == connectionSock) {
                     DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-                    clientOutput.writeBytes("\n" +userToaward + " has not opted into the game! No points awarded\n");
+                    clientOutput.writeBytes("\n" + user + " has not opted into the game! No points awarded\n");
                   }
                 }
               }
-
             } else if (command.equalsIgnoreCase("leaderboard")) {
-              Collections.sort(playerList, Collections.reverseOrder());
-
-              for (Socket s : socketList) {
+                Collections.sort(playerList, Collections.reverseOrder());
+                for (Socket s : socketList) {
                   DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
                   clientOutput.writeBytes("LEADERBOARD: \n");
                   for (Player p : playerList) {
@@ -105,9 +100,8 @@ public class ClientHandler implements Runnable {
                       clientOutput.writeBytes(p.toString() + "\n");
                     }
                   }
-              }
-            }
-            else if (command.equalsIgnoreCase("new artist")) {
+                }
+            } else if (command.equalsIgnoreCase("new artist")) {
               String newArtist = clientInput.readLine();
               artist = newArtist;
               for (Socket s : socketList) {
@@ -116,8 +110,7 @@ public class ClientHandler implements Runnable {
                   clientOutput.writeBytes("Host has changed the artist!\n");
                 }
               }
-            }
-            else if (command.equalsIgnoreCase("start game")) {
+            } else if (command.equalsIgnoreCase("start game")) {
               for (Socket s : socketList) {
                 if (s != connectionSock) {
                   DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
@@ -127,19 +120,15 @@ public class ClientHandler implements Runnable {
               //retrieve song from spotify
               //playback song
               //start timer, maybe give hints after certain time periods
-            }
-
-
-            else {  //if none of key words entered, then broadcast
+            } else {  //if none of key words entered, then broadcast
               for (Socket s : socketList) {
                 if (s != connectionSock) {
                   DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-                  clientOutput.writeBytes(username + ": " +command+"\n");
+                  clientOutput.writeBytes(username + ": " + command + "\n");
                 }
               }
             }
-          }
-          else {  //if not host client
+          } else {  //if not host client
             if (command.equalsIgnoreCase("join game")) {
               Player temp = new Player(username);
               temp.setOptedIn(true);
@@ -150,18 +139,16 @@ public class ClientHandler implements Runnable {
                   clientOutput.writeBytes(username + " has joined the game!\n");
                 }
               }
-            }
-            else {
+            } else {
               for (Socket s : socketList) {
                 if (s != connectionSock) {
                   DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-                  clientOutput.writeBytes(username + ": " +command+"\n");
+                  clientOutput.writeBytes(username + ": " + command + "\n");
                 }
               }
             }
           }
-        }
-        else {
+        } else {
           //Connection was lost
           System.out.println("Closing connection for socket " + connectionSock);
           //Remove from arraylist
@@ -170,7 +157,6 @@ public class ClientHandler implements Runnable {
           break;
         }
       }
-
     } catch (Exception e) {
       System.out.println("Error: " + e.toString());
       // Remove from arraylist

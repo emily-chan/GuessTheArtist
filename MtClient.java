@@ -37,8 +37,8 @@ public class MtClient {
 
   public static void main(String[] args) {
     try {
-      String hostname = "localhost";
-      int port = 7654;
+      String hostname = "192.168.99.100";
+      int port = 1337;
 
       System.out.println("Connecting to server on port " + port);
       Socket connectionSock = new Socket(hostname, port);
@@ -51,6 +51,7 @@ public class MtClient {
       ClientListener listener = new ClientListener(connectionSock);
       Thread theThread = new Thread(listener);
       theThread.start();
+      String artistName = "";
 
       // Read input from the keyboard and send it to everyone else.
       // The only way to quit is to hit control-c, but a quit command
@@ -63,17 +64,15 @@ public class MtClient {
       // check if username is host
       if (username.equalsIgnoreCase("host")) {
         System.out.print("You are the host! Enter an Artist's name: ");
-        String artistName = keyboard.nextLine();  //add function that takes in String artistName to retrieve and play spotify song
+        artistName = keyboard.nextLine();  //add function that takes in String artistName to retrieve and play spotify song
         serverOutput.writeBytes(artistName + "\n");
-      }
-      else {  //if not host
-        System.out.println("Welcome to the Guess the Artist Game! type 'join game' to opt-in to the game! if, not you may just lurk as a spectator.");
+      } else {  //if not host
+      	System.out.println("Welcome to the Guess the Artist Game! type 'join game' to opt-in to the game! if, not you may just lurk as a spectator.");
         String input = keyboard.nextLine();
         if (input.equals("join game")) {
           serverOutput.writeBytes("join game\n");
           System.out.println("You have opted-in to participate! Be the first person to name the song correctly to earn points.");
-        }
-        else {
+        } else {
           serverOutput.writeBytes(input + "\n");
         }
       }
@@ -86,32 +85,32 @@ public class MtClient {
           System.out.println("Type 'new artist' to change the artist");
           System.out.println("Type 'start game' to begin the game");
           String command = keyboard.nextLine();
-          serverOutput.writeBytes(command+"\n");
+          serverOutput.writeBytes(command + "\n");
           if (command.equalsIgnoreCase("points")) { //award points to certain client by username
             System.out.print("Enter client's username: ");
             String u = keyboard.nextLine();
-            System.out.print("Enter number of points to award to client: ");  //we should add a function to calculate points awarded based on obscurity of artist
+            //we should add a function to calculate points awarded based on obscurity of artist
             //pointsToAward(String hostAnswer); //either pull popularity stats from spotify or sentiment analysis from twitter and calculate
-            int pts = keyboard.nextInt();
-            serverOutput.writeBytes(u+"\n");
-            serverOutput.writeByte(pts);  //can pass a maximum of 255 points in one writeByte
-          }
-          else if (command.equalsIgnoreCase("new artist")) {
+            serverOutput.writeBytes(u + "\n");
+
+            //Thread.sleep(4000);
+          } else if (command.equalsIgnoreCase("new artist")) {
             System.out.println("Enter name of new artist: ");
             String newArtist = keyboard.nextLine();
-            serverOutput.writeBytes(newArtist+"\n");
-            System.out.println("Artist changed to: " +newArtist);
+            artistName = newArtist;
+            serverOutput.writeBytes(newArtist + "\n");
+            System.out.println("Artist changed to: " + newArtist);
+          } else if (command.equalsIgnoreCase("start game")) {
+              //do something
           }
-        }
-        else
-        {
+
+        } else {
           //commands for clients
           String input = keyboard.nextLine();
           if (input.equals("join game")) {
             serverOutput.writeBytes("join game\n");
-            System.out.println("You have opted-in to participate! Be the first person to name the song correctly to earn points.");
-          }
-          else {
+            System.out.println("You have opted-in to participate! Be the first person to name the correct artist to earn points.");
+          } else {
             serverOutput.writeBytes(input + "\n");
           }
         }
