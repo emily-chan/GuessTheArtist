@@ -66,7 +66,9 @@ public class ClientHandler implements Runnable {
           if (username.equalsIgnoreCase("host")) {
             if (command.equalsIgnoreCase("points")) {
               String user = clientInput.readLine();
-              int pts = clientInput.read();
+              int pts = Pythonreader.runAnalysis(artist);
+              System.out.println("sent analysis result: " +pts);
+              //int pts = clientInput.read();
               boolean playerOptedIn = false;
               for (Player p : playerList) {
                 if (p.getUsername().equalsIgnoreCase(user)) {
