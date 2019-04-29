@@ -102,10 +102,10 @@ public class MtClient {
             System.out.println("Artist changed to: " + newArtist);
           } else if (command.equalsIgnoreCase("start game")) {
               //do something
-          }
-
-            int pts = keyboard.nextInt();
+          	System.out.println("Enter client's username: ");
+          	String u = keyboard.nextLine();
             serverOutput.writeBytes(u + "\n");
+            int pts = keyboard.nextInt();
             serverOutput.writeByte(pts);  //can pass a maximum of 255 points in one writeByte
           } else if (command.equalsIgnoreCase("new artist")) {
             System.out.println("Enter name of new artist: ");
@@ -128,4 +128,4 @@ public class MtClient {
       System.out.println(e.getMessage());
     }
   }
-} // MtClient
+ }// MtClient
