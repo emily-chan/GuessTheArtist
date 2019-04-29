@@ -104,6 +104,15 @@ public class MtClient {
               //do something
           }
 
+            int pts = keyboard.nextInt();
+            serverOutput.writeBytes(u + "\n");
+            serverOutput.writeByte(pts);  //can pass a maximum of 255 points in one writeByte
+          } else if (command.equalsIgnoreCase("new artist")) {
+            System.out.println("Enter name of new artist: ");
+            String newArtist = keyboard.nextLine();
+            serverOutput.writeBytes(newArtist + "\n");
+            System.out.println("Artist changed to: " + newArtist);
+          }
         } else {
           //commands for clients
           String input = keyboard.nextLine();
