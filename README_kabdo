@@ -1,2 +1,8 @@
-Contributions and future work: 
-Beginning the integration of the twitter and spotify API into the program for the sentiment analysis and song guessing. 
+Contributions;
+  began research and development of spotify play back for the game 
+ 
+restrictions:
+  seems that spotify play back is only accessible through html and webpages
+  
+future work: 
+  figuring out how to work around the restrictions
