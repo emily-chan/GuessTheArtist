@@ -37,8 +37,12 @@ public class MtClient {
 
   public static void main(String[] args) {
     try {
-      String hostname = "192.168.99.100";
-      int port = 1337;
+      //String hostname = "192.168.99.100";
+      //String hostname = "172.17.0.1";
+      //int port = 1337;
+
+      String hostname = "localhost";
+      int port = 7654;
 
       System.out.println("Connecting to server on port " + port);
       Socket connectionSock = new Socket(hostname, port);
@@ -72,6 +76,12 @@ public class MtClient {
         if (input.equals("join game")) {
           serverOutput.writeBytes("join game\n");
           System.out.println("You have opted-in to participate! Be the first person to name the song correctly to earn points.");
+          System.out.println("Press 'Enter' to continue");
+          String hint = keyboard.nextLine();
+          if (input.equals("hint")) {
+            serverOutput.writeBytes("hint");
+            System.out.println("You have requested a hint");
+          }
         } else {
           serverOutput.writeBytes(input + "\n");
         }
@@ -84,6 +94,7 @@ public class MtClient {
           System.out.println("Type 'leaderboard' to display all clients and their scores");
           System.out.println("Type 'new artist' to change the artist");
           System.out.println("Type 'start game' to begin the game");
+          System.out.println("Type 'hint' to give a hint");
           String command = keyboard.nextLine();
           serverOutput.writeBytes(command + "\n");
           if (command.equalsIgnoreCase("points")) { //award points to certain client by username
@@ -92,26 +103,25 @@ public class MtClient {
             //we should add a function to calculate points awarded based on obscurity of artist
             //pointsToAward(String hostAnswer); //either pull popularity stats from spotify or sentiment analysis from twitter and calculate
             serverOutput.writeBytes(u + "\n");
-
             //Thread.sleep(4000);
           } else if (command.equalsIgnoreCase("new artist")) {
-            System.out.println("Enter name of new artist: ");
+            System.out.print("Enter name of new artist: ");
             String newArtist = keyboard.nextLine();
             artistName = newArtist;
             serverOutput.writeBytes(newArtist + "\n");
             System.out.println("Artist changed to: " + newArtist);
           } else if (command.equalsIgnoreCase("start game")) {
               //do something
-          	System.out.println("Enter client's username: ");
+          	System.out.print("Enter client's username: ");
           	String u = keyboard.nextLine();
             serverOutput.writeBytes(u + "\n");
             int pts = keyboard.nextInt();
             serverOutput.writeByte(pts);  //can pass a maximum of 255 points in one writeByte
-          } else if (command.equalsIgnoreCase("new artist")) {
-            System.out.println("Enter name of new artist: ");
-            String newArtist = keyboard.nextLine();
-            serverOutput.writeBytes(newArtist + "\n");
-            System.out.println("Artist changed to: " + newArtist);
+          } else if (command.equalsIgnoreCase("hint")) {
+            System.out.print("Enter hint: ");
+            String hint = keyboard.nextLine();
+            serverOutput.writeBytes(hint + "\n");
+            System.out.println("Hint sent: " + hint);
           }
         } else {
           //commands for clients

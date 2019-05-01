@@ -67,7 +67,7 @@ public class ClientHandler implements Runnable {
             if (command.equalsIgnoreCase("points")) {
               String user = clientInput.readLine();
               int pts = Pythonreader.runAnalysis(artist);
-              System.out.println("sent analysis result: " +pts);
+              System.out.println("sentiment analysis result: " + pts);
               //int pts = clientInput.read();
               boolean playerOptedIn = false;
               for (Player p : playerList) {
@@ -118,6 +118,13 @@ public class ClientHandler implements Runnable {
                   clientOutput.writeBytes("Host has started the game!\n");
                 }
               }
+            } else if (command.equalsIgnoreCase("hint")) {
+               for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes("Host has given a hint!\n");
+                }
+            }
               //retrieve song from spotify
               //playback song
               //start timer, maybe give hints after certain time periods
@@ -138,6 +145,13 @@ public class ClientHandler implements Runnable {
                 if (s != connectionSock) {
                   DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
                   clientOutput.writeBytes(username + " has joined the game!\n");
+                }
+              }
+            } else if (command.equals("hint")) {
+              for (Socket s : socketList) {
+                if (s != connectionSock) {
+                  DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
+                  clientOutput.writeBytes(username + " would like a hint\n");
                 }
               }
             } else {
