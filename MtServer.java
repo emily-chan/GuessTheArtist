@@ -35,14 +35,15 @@ public class MtServer {
   private void getConnection() {
     // Wait for a connection from the client
     try {
-      //System.out.println("Waiting for client connections on port 1337.");
-      //ServerSocket serverSock = new ServerSocket(1337);
-      System.out.println("Waiting for client connections on port 7654.");
-      ServerSocket serverSock = new ServerSocket(7654);
+      System.out.println("Waiting for client connections on port 1337.");
+      ServerSocket serverSock = new ServerSocket(1337);
+      //System.out.println("Waiting for client connections on port 7654.");
+      //ServerSocket serverSock = new ServerSocket(7654);
       // This is an infinite loop, the user will have to shut it down
       // using control-c
       while (true) {
         Socket connectionSock = serverSock.accept();
+        System.out.println(connectionSock);
         // Add this socket to the list
         socketList.add(connectionSock);
         // Send to ClientHandler the socket and arraylist of all sockets

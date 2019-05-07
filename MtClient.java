@@ -38,11 +38,12 @@ public class MtClient {
   public static void main(String[] args) {
     try {
       //String hostname = "192.168.99.100";
-      //String hostname = "172.17.0.1";
-      //int port = 1337;
+      // using docker
+      String hostname = "172.17.0.2";
+      int port = 1337;
 
-      String hostname = "localhost";
-      int port = 7654;
+      //String hostname = "localhost";
+      //int port = 7654;
 
       System.out.println("Connecting to server on port " + port);
       Socket connectionSock = new Socket(hostname, port);
@@ -75,10 +76,10 @@ public class MtClient {
         String input = keyboard.nextLine();
         if (input.equals("join game")) {
           serverOutput.writeBytes("join game\n");
-          System.out.println("You have opted-in to participate! Be the first person to name the song correctly to earn points.");
+          System.out.println("You have opted-in to participate! Be the first person to name the song correctly to earn points. Type 'hint' to request a hint from the host.");
           System.out.println("Press 'Enter' to continue");
           String hint = keyboard.nextLine();
-          if (input.equals("hint")) {
+          if (hint.equals("hint")) {
             serverOutput.writeBytes("hint");
             System.out.println("You have requested a hint");
           }
