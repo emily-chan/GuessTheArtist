@@ -24,6 +24,7 @@ public class ClientHandler implements Runnable {
   private ArrayList<Socket> socketList;
   public static ArrayList<Player> playerList = new ArrayList<Player>();
   public String artist = "";
+  public String hint = "";
 
   ClientHandler(Socket sock, ArrayList<Socket> socketList) {
     this.connectionSock = sock;
@@ -124,7 +125,7 @@ public class ClientHandler implements Runnable {
                   DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
                   clientOutput.writeBytes("Host has given a hint!\n");
                 }
-            }*/
+            } */
               //retrieve song from spotify
               //playback song
               //start timer, maybe give hints after certain time periods
@@ -151,7 +152,7 @@ public class ClientHandler implements Runnable {
               for (Socket s : socketList) {
                 if (s != connectionSock) {
                   DataOutputStream clientOutput = new DataOutputStream(s.getOutputStream());
-                  clientOutput.writeBytes(username + " would like a hint\n");
+                  clientOutput.writeBytes(username + " requested a hint\n");
                 }
               }
             } else {

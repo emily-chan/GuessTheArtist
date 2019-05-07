@@ -43,7 +43,6 @@ public class MtServer {
       // using control-c
       while (true) {
         Socket connectionSock = serverSock.accept();
-        System.out.println(connectionSock);
         // Add this socket to the list
         socketList.add(connectionSock);
         // Send to ClientHandler the socket and arraylist of all sockets
