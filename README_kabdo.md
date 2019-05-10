@@ -9,4 +9,4 @@ future work:
   
 final contributions: I Qorked with Kiara to figure out spotify play back without implementing a webpage, 
   but it was unsuccessful. The spotify playback that we intended for did not work, depsite the use of 
-  the Wrapper classes that were out there. 
+  the Wrapper classes that were out there. Was unsuccessful to integrate Spotify with the docker container
