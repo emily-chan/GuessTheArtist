@@ -21,4 +21,8 @@ Planned contributions:
 -spotify playback 
 -get timer and hints to broadcast 
 
+Contributions for Final Submission: 
+-Collaborated with team members to troubleshoot docker container setup issues.
+-unsuccessfully attempted to setup docker environment that supports spotify playback
+
 
